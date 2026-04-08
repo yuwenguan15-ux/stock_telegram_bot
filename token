@@ -1,0 +1,39 @@
+import requests
+from bs4 import BeautifulSoup
+import time
+
+# 股票代號
+stock = ["1101", "2330"]
+
+for stockid in stock:
+
+    url = f"https://tw.stock.yahoo.com/quote/{stockid}.TW"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    r = requests.get(url, headers=headers)
+    soup = BeautifulSoup(r.text, 'html.parser')
+
+    # 抓股價（用較穩定方式）
+    price_tag = soup.find('fin-streamer', {'data-field': 'regularMarketPrice'})
+
+    if price_tag:
+        price = price_tag.text
+    else:
+        price = "抓不到"
+
+    message = f"股票 {stockid} 即時股價為 {price}"
+
+    print(message)  # 先印出來確認
+
+    # Telegram 設定
+    token = "8004563583:AAF8ujXhzEUFu8Sibs757QURKhlgzYZn50U"
+    chat_id = "8716624719"
+
+    telegram_url = f"https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={message}"
+
+    requests.get(telegram_url)
+
+    time.sleep(3)
